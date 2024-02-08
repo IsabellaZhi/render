@@ -1,0 +1,109 @@
+<html>
+<head>
+    <h3> Isabella Yiran Zhi, yz952 </h3>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+
+    <link href="https://fonts.googleapis.com/css?family=Lato:400,700|Raleway:400,700" rel="stylesheet">
+
+    <!-- <link rel="stylesheet" type="text/css" href="../css/normalize.css">
+    <link rel="stylesheet" type="text/css" href="../css/skeleton.css">
+    <link rel="stylesheet" type="text/css" href="../css/custom-style.css"> -->
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/styles/default.min.css">
+    <!-- <link rel="stylesheet" href="../css/hljs-base16.css"> -->
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/highlight.min.js"></script>
+
+    <style>
+    .gridlines line {
+      stroke: #bbb;
+    }
+    .gridlines .domain {
+      stroke: none;
+    }
+    </style>
+
+</head>
+<body>
+
+    <svg id="scatterplot" height="500" width="500" style="margin-top:50px"></svg>
+
+<script>
+
+    // Question A
+    const requestData = async function() {
+
+    const data = await d3.csv("./filtered_years.csv");
+    const dpwtrees = data.filter(d => d.qCaretaker === 'DPW');
+
+    // Question B
+    const svg = d3.select('svg#scatterplot');
+    const width = svg.attr('width');
+    const height = svg.attr('height');
+    const margins = {top: 10, right: 10, bottom: 50, left: 50};
+    const chartWidth = width - margins.left - margins.right;
+    const chartHeight = height - margins.top - margins.bottom;
+    //let chartArea = svg.append('g')
+                       //.attr('transform',`translate(${margins.left},${margins.top})`);
+
+
+    const xExtent = d3.extent(data, d => +d['Years']);
+    const xScale = d3.scaleLinear().domain(xExtent).range([0, chartWidth]);
+    const yExtent = d3.extent(data, d => +d['DBH']);
+    const yMax = d3.max(data, d => +d['DBH']);
+    const yScale = d3.scaleLog().domain([1, yMax]).range([chartHeight, 0]);
+    //const yScale = d3.scaleLog().domain([1,90]).range([chartHeight, 0]);
+
+    // Question C
+    // y-axis and horizontal gridlines
+    let leftAxis = d3.axisLeft(yScale);
+    svg.append('g')
+        .attr('class', 'y axis')
+        .attr('transform',`translate(${margins.left-5},${margins.top})`)
+        .call(leftAxis);
+    let leftGridlines = d3.axisLeft(yScale)
+                          .tickSize(-chartWidth-10)
+                          .tickFormat('');
+    svg.append('g')
+        .attr('class', 'gridlines')
+        .attr('transform',`translate(${margins.left-5},${margins.top})`)
+        .call(leftGridlines);
+
+    // x-axis and verticle gridlines
+    let bottomAxis = d3.axisBottom(xScale);
+    svg.append('g')
+        .attr('class', 'x axis')
+        .attr('transform',`translate(${margins.left+5},${chartHeight+20})`)
+        .call(bottomAxis);
+    let bottomGridlines = d3.axisBottom(xScale)
+                            .tickSize(-chartWidth-10)
+                            .tickFormat('');
+    svg.append('g')
+        .attr('class', 'gridlines')
+        .attr('transform',`translate(${margins.left+5},${chartHeight+20})`)
+        .call(bottomGridlines);
+
+    // Question D
+    dpwtrees.forEach((d) => {
+        svg.append("circle")
+            .attr("cx", xScale(d["Years"]) + margins.left+5)
+            .attr("cy", yScale(d["DBH"])+10)
+            .attr("r", 2.7)
+            //.style("fill", "#CA6F1E")// any way to put into 1 line?
+            .style("opacity", 0.3)
+            .attr('fill',"green"
+            // function() {
+            //     if(d.qCaretaker == 'DPW'){ return 'blue'; }
+            //     else if(d.qCaretaker == 'Private'){ return '#CA6F1E'; }
+            //     else{ return 'red'; }}
+            );
+
+    });
+
+}
+  requestData();
+
+</script>
+
+
+
+</body>
+</html>
